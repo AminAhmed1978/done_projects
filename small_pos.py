@@ -14,7 +14,6 @@ def generate_pdf_bill(sales_df, total_amount):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-
     pdf.cell(200, 10, txt="Invoice", ln=True, align="C")
     pdf.cell(200, 10, txt="Item List", ln=True, align="L")
 
@@ -42,15 +41,17 @@ if st.sidebar.button("Dashboard"):
     else:
         st.write("No sales data available to display the graph.")
 
-# Purchase Window
+# Purchase Window using st.form
 if st.sidebar.button("Purchase Window"):
     st.title("Purchase Window")
-    item = st.text_input("Item Name", key="item_name")
-    stock_qty = st.number_input("Stock Quantity", min_value=0, step=1, key="stock_qty")
-    purchase_rate = st.number_input("Purchase Rate", min_value=0.0, format="%.2f", key="purchase_rate")
-    selling_rate = st.number_input("Selling Rate", min_value=0.0, format="%.2f", key="selling_rate")
+    with st.form(key='purchase_form'):
+        item = st.text_input("Item Name", key="item_name")
+        stock_qty = st.number_input("Stock Quantity", min_value=0, step=1, key="stock_qty")
+        purchase_rate = st.number_input("Purchase Rate", min_value=0.0, format="%.2f", key="purchase_rate")
+        selling_rate = st.number_input("Selling Rate", min_value=0.0, format="%.2f", key="selling_rate")
+        submit_button = st.form_submit_button(label="Add Item")
 
-    if st.button("Add Item"):
+    if submit_button:
         new_item = {
             'Item': st.session_state.item_name,
             'Stock Qty': st.session_state.stock_qty,
@@ -63,23 +64,24 @@ if st.sidebar.button("Purchase Window"):
     st.write("Current Inventory")
     st.dataframe(st.session_state.inventory)
 
-# Selling Window
+# Selling Window using st.form
 if st.sidebar.button("Selling Window"):
     st.title("Selling Window")
-    item_list = st.session_state.inventory['Item'].tolist()
-    selected_item = st.selectbox("Select Item to Sell", item_list, key="selected_item")
-    qty = st.number_input("Quantity", min_value=1, step=1, key="sell_qty")
-    
-    if selected_item:
+    with st.form(key='selling_form'):
+        item_list = st.session_state.inventory['Item'].tolist()
+        selected_item = st.selectbox("Select Item to Sell", item_list, key="selected_item")
+        qty = st.number_input("Quantity", min_value=1, step=1, key="sell_qty")
+        add_to_invoice_button = st.form_submit_button(label="Add to Invoice")
+
+    if add_to_invoice_button and selected_item:
         rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Selling Rate'].values[0]
         purchase_rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Purchase Rate'].values[0]
         amount = st.session_state.sell_qty * rate
         profit = st.session_state.sell_qty * (rate - purchase_rate)
 
-        if st.button("Add to Invoice"):
-            sale_entry = {'Item': selected_item, 'Qty': st.session_state.sell_qty, 'Rate': rate, 'Amount': amount, 'Profit': profit}
-            st.session_state.sales = st.session_state.sales.append(sale_entry, ignore_index=True)
-            st.success(f"Added {selected_item} to invoice.")
+        sale_entry = {'Item': selected_item, 'Qty': st.session_state.sell_qty, 'Rate': rate, 'Amount': amount, 'Profit': profit}
+        st.session_state.sales = st.session_state.sales.append(sale_entry, ignore_index=True)
+        st.success(f"Added {selected_item} to invoice.")
 
     st.write("Invoice")
     st.dataframe(st.session_state.sales)
