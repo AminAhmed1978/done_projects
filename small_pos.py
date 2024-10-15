@@ -27,7 +27,10 @@ def generate_pdf_bill(sales_df, total_amount):
 
 # Main Dashboard with Graph
 st.sidebar.title("POS System")
-if st.sidebar.button("Dashboard"):
+selected_option = st.sidebar.radio("Choose an option:", ['Dashboard', 'Purchase Window', 'Selling Window'])
+
+# Dashboard
+if selected_option == 'Dashboard':
     st.title("Sales and Profit Dashboard")
     if not st.session_state.sales.empty:
         fig, ax = plt.subplots()
@@ -42,7 +45,7 @@ if st.sidebar.button("Dashboard"):
         st.write("No sales data available to display the graph.")
 
 # Purchase Window using st.form
-if st.sidebar.button("Purchase Window"):
+if selected_option == 'Purchase Window':
     st.title("Purchase Window")
     with st.form(key='purchase_form'):
         item = st.text_input("Item Name", key="item_name")
@@ -58,14 +61,14 @@ if st.sidebar.button("Purchase Window"):
             'Purchase Rate': st.session_state.purchase_rate,
             'Selling Rate': st.session_state.selling_rate
         }
-        st.session_state.inventory = st.session_state.inventory.append(new_item, ignore_index=True)
+        st.session_state.inventory = pd.concat([st.session_state.inventory, pd.DataFrame([new_item])], ignore_index=True)
         st.success(f"Added {st.session_state.item_name} to inventory.")
 
     st.write("Current Inventory")
     st.dataframe(st.session_state.inventory)
 
 # Selling Window using st.form
-if st.sidebar.button("Selling Window"):
+if selected_option == 'Selling Window':
     st.title("Selling Window")
     with st.form(key='selling_form'):
         item_list = st.session_state.inventory['Item'].tolist()
@@ -80,7 +83,7 @@ if st.sidebar.button("Selling Window"):
         profit = st.session_state.sell_qty * (rate - purchase_rate)
 
         sale_entry = {'Item': selected_item, 'Qty': st.session_state.sell_qty, 'Rate': rate, 'Amount': amount, 'Profit': profit}
-        st.session_state.sales = st.session_state.sales.append(sale_entry, ignore_index=True)
+        st.session_state.sales = pd.concat([st.session_state.sales, pd.DataFrame([sale_entry])], ignore_index=True)
         st.success(f"Added {selected_item} to invoice.")
 
     st.write("Invoice")
