@@ -7,20 +7,33 @@ from fpdf import FPDF
 if 'inventory' not in st.session_state:
     st.session_state.inventory = pd.DataFrame(columns=['Item', 'Stock Qty', 'Purchase Rate', 'Selling Rate'])
 if 'sales' not in st.session_state:
-    st.session_state.sales = pd.DataFrame(columns=['Item', 'Qty', 'Rate', 'Amount', 'Profit'])
+    st.session_state.sales = pd.DataFrame(columns=['Item', 'Qty', 'Rate', 'Amount'])
 
-# Function to generate PDF bill
+# Function to generate PDF bill with improved formatting
 def generate_pdf_bill(sales_df, total_amount):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("Arial", 'B', size=14)
     pdf.cell(200, 10, txt="Invoice", ln=True, align="C")
+    pdf.set_font("Arial", size=12)
     pdf.cell(200, 10, txt="Item List", ln=True, align="L")
 
-    for index, row in sales_df.iterrows():
-        pdf.cell(200, 10, txt=f"{row['Item']} | Qty: {row['Qty']} | Rate: {row['Rate']} | Amount: {row['Amount']} | Profit: {row['Profit']}", ln=True)
+    pdf.set_font("Arial", size=10)
+    pdf.cell(200, 10, txt="Item | Qty | Rate | Amount", ln=True)
+    pdf.cell(200, 5, txt="------------------------------------------", ln=True)
 
+    for index, row in sales_df.iterrows():
+        pdf.cell(200, 10, txt=f"{row['Item']} | {row['Qty']} | {row['Rate']} | {row['Amount']}", ln=True)
+
+    pdf.cell(200, 10, txt="------------------------------------------", ln=True)
+    pdf.set_font("Arial", 'B', size=12)
     pdf.cell(200, 10, txt=f"Total Amount: {total_amount}", ln=True)
+    pdf.cell(200, 10, txt="------------------------------------------", ln=True)
+
+    # Add footer text with developer information
+    pdf.set_font("Arial", size=10)
+    pdf.cell(200, 10, txt="Developed by: AMIN AHMED", ln=True, align="C")
+
     pdf_file = "invoice.pdf"
     pdf.output(pdf_file)
     return pdf_file
@@ -31,15 +44,28 @@ selected_option = st.sidebar.radio("Choose an option:", ['Dashboard', 'Purchase 
 
 # Dashboard
 if selected_option == 'Dashboard':
-    st.title("Sales and Profit Dashboard")
+    # Add the main heading and developer information on the dashboard
+    st.markdown("<h1 style='text-align: center; font-size: 32px;'>POS System</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; font-size: 15px;'>Developed by: AMIN AHMED</h2>", unsafe_allow_html=True)
+
+    # Display the Purchase and Sales Invoice buttons at the top
+    st.button("Purchase Invoice", key="purchase_invoice_button")
+    st.button("Sales Invoice", key="sales_invoice_button")
+    st.markdown("---")
+
+    # Summarize and display total sales and profit
+    total_sales = st.session_state.sales['Amount'].sum()
+    total_profit = (st.session_state.sales['Amount'] - (st.session_state.sales['Qty'] * st.session_state.sales['Rate'])).sum()
+
+    st.write(f"**Total Sales Amount:** ${total_sales:.2f}")
+    st.write(f"**Total Profit Amount:** ${total_profit:.2f}")
+
+    # Display a resized sales and profit bar chart
     if not st.session_state.sales.empty:
-        fig, ax = plt.subplots()
-        ax.bar(st.session_state.sales['Item'], st.session_state.sales['Amount'], label='Sales Amount', color='blue')
-        ax.bar(st.session_state.sales['Item'], st.session_state.sales['Profit'], label='Profit Amount', color='green')
-        ax.set_xlabel('Items')
-        ax.set_ylabel('Amount')
-        ax.set_title('Sales and Profit Visualization')
-        ax.legend()
+        fig, ax = plt.subplots(figsize=(6, 4))  # Reduced the chart size
+        ax.bar(['Total Sales', 'Total Profit'], [total_sales, total_profit], color=['blue', 'green'])
+        ax.set_title('Sales and Profit Summary')
+        ax.set_ylabel('Amount ($)')
         st.pyplot(fig)
     else:
         st.write("No sales data available to display the graph.")
@@ -56,13 +82,14 @@ if selected_option == 'Purchase Window':
 
     if submit_button:
         new_item = {
-            'Item': st.session_state.item_name,
-            'Stock Qty': st.session_state.stock_qty,
-            'Purchase Rate': st.session_state.purchase_rate,
-            'Selling Rate': st.session_state.selling_rate
+            'Item': item,
+            'Stock Qty': stock_qty,
+            'Purchase Rate': purchase_rate,
+            'Selling Rate': selling_rate
         }
         st.session_state.inventory = pd.concat([st.session_state.inventory, pd.DataFrame([new_item])], ignore_index=True)
-        st.success(f"Added {st.session_state.item_name} to inventory.")
+        st.success(f"Added {item} to inventory.")
+        st.experimental_rerun()  # Clear form fields after submission
 
     st.write("Current Inventory")
     st.dataframe(st.session_state.inventory)
@@ -77,14 +104,16 @@ if selected_option == 'Selling Window':
         add_to_invoice_button = st.form_submit_button(label="Add to Invoice")
 
     if add_to_invoice_button and selected_item:
-        rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Selling Rate'].values[0]
-        purchase_rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Purchase Rate'].values[0]
-        amount = st.session_state.sell_qty * rate
-        profit = st.session_state.sell_qty * (rate - purchase_rate)
+        rate = st.session_state.inventory.loc[st.session_state.inventory['Item'] == selected_item, 'Selling Rate'].values[0]
+        amount = qty * rate
 
-        sale_entry = {'Item': selected_item, 'Qty': st.session_state.sell_qty, 'Rate': rate, 'Amount': amount, 'Profit': profit}
+        sale_entry = {'Item': selected_item, 'Qty': qty, 'Rate': rate, 'Amount': amount}
         st.session_state.sales = pd.concat([st.session_state.sales, pd.DataFrame([sale_entry])], ignore_index=True)
-        st.success(f"Added {selected_item} to invoice.")
+
+        # Deduct sold quantity from stock
+        st.session_state.inventory.loc[st.session_state.inventory['Item'] == selected_item, 'Stock Qty'] -= qty
+        st.success(f"Added {selected_item} to invoice and updated inventory.")
+        st.experimental_rerun()  # Clear form fields after submission
 
     st.write("Invoice")
     st.dataframe(st.session_state.sales)
@@ -96,3 +125,9 @@ if selected_option == 'Selling Window':
         pdf_file = generate_pdf_bill(st.session_state.sales, total_amount)
         st.success("Bill generated successfully!")
         st.download_button("Download Invoice", data=open(pdf_file, "rb"), file_name="invoice.pdf", mime="application/pdf")
+
+# Stock Information
+if selected_option == 'Dashboard':
+    st.title("Current Stock")
+    st.write("Check remaining stock of items.")
+    st.dataframe(st.session_state.inventory[['Item', 'Stock Qty']])
