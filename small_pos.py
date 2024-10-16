@@ -87,7 +87,11 @@ if selected_option == 'Purchase Window':
         }
         st.session_state.inventory = pd.concat([st.session_state.inventory, pd.DataFrame([new_item])], ignore_index=True)
         st.success(f"Added {item} to inventory.")
-        st.experimental_rerun()  # Clear form fields after submission
+        # Clear form fields manually
+        st.session_state.item_name = ""
+        st.session_state.stock_qty = 0
+        st.session_state.purchase_rate = 0.0
+        st.session_state.selling_rate = 0.0
 
     st.write("Current Inventory")
     st.dataframe(st.session_state.inventory)
@@ -111,7 +115,8 @@ if selected_option == 'Selling Window':
         # Deduct sold quantity from stock
         st.session_state.inventory.loc[st.session_state.inventory['Item'] == selected_item, 'Stock Qty'] -= qty
         st.success(f"Added {selected_item} to invoice and updated inventory.")
-        st.experimental_rerun()  # Clear form fields after submission
+        # Clear form fields manually
+        st.session_state.sell_qty = 1
 
     st.write("Invoice")
     st.dataframe(st.session_state.sales)
