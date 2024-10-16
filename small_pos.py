@@ -38,20 +38,18 @@ def generate_pdf_bill(sales_df, total_amount):
     pdf.output(pdf_file)
     return pdf_file
 
-# Main Dashboard with Graph
+# Sidebar for navigation
 st.sidebar.title("POS System")
-selected_option = st.sidebar.radio("Choose an option:", ['Dashboard', 'Purchase Window', 'Selling Window'])
+st.sidebar.markdown("<h1 style='text-align: center; font-size: 24px;'>POS System</h1>", unsafe_allow_html=True)
+st.sidebar.markdown("<h2 style='text-align: center; font-size: 15px;'>Developed by: AMIN AHMED</h2>", unsafe_allow_html=True)
+
+selected_option = st.sidebar.radio("Choose an option:", ['Dashboard', 'Purchase Window', 'Selling Window', 'Stock'])
 
 # Dashboard
 if selected_option == 'Dashboard':
     # Add the main heading and developer information on the dashboard
     st.markdown("<h1 style='text-align: center; font-size: 32px;'>POS System</h1>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: center; font-size: 15px;'>Developed by: AMIN AHMED</h2>", unsafe_allow_html=True)
-
-    # Display the Purchase and Sales Invoice buttons at the top
-    st.button("Purchase Invoice", key="purchase_invoice_button")
-    st.button("Sales Invoice", key="sales_invoice_button")
-    st.markdown("---")
 
     # Summarize and display total sales and profit
     total_sales = st.session_state.sales['Amount'].sum()
@@ -127,7 +125,7 @@ if selected_option == 'Selling Window':
         st.download_button("Download Invoice", data=open(pdf_file, "rb"), file_name="invoice.pdf", mime="application/pdf")
 
 # Stock Information
-if selected_option == 'Dashboard':
+if selected_option == 'Stock':
     st.title("Current Stock")
     st.write("Check remaining stock of items.")
     st.dataframe(st.session_state.inventory[['Item', 'Stock Qty']])
