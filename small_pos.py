@@ -7,7 +7,7 @@ from fpdf import FPDF
 if 'inventory' not in st.session_state:
     st.session_state.inventory = pd.DataFrame(columns=['Item', 'Stock Qty', 'Purchase Rate', 'Selling Rate'])
 if 'sales' not in st.session_state:
-    st.session_state.sales = pd.DataFrame(columns=['Item', 'Qty', 'Rate', 'Amount'])
+    st.session_state.sales = pd.DataFrame(columns=['Item', 'Qty', 'Rate', 'Amount', 'Profit'])
 
 # Function to generate PDF bill with improved formatting
 def generate_pdf_bill(sales_df, total_amount):
@@ -47,13 +47,12 @@ selected_option = st.sidebar.radio("Choose an option:", ['Dashboard', 'Purchase 
 
 # Dashboard
 if selected_option == 'Dashboard':
-    # Add the main heading and developer information on the dashboard
     st.markdown("<h1 style='text-align: center; font-size: 32px;'>POS System</h1>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: center; font-size: 15px;'>Developed by: AMIN AHMED</h2>", unsafe_allow_html=True)
 
     # Summarize and display total sales and profit
     total_sales = st.session_state.sales['Amount'].sum()
-    total_profit = (st.session_state.sales['Amount'] - (st.session_state.sales['Qty'] * st.session_state.sales['Rate'])).sum()
+    total_profit = st.session_state.sales['Profit'].sum()
 
     st.write(f"**Total Sales Amount:** ${total_sales:.2f}")
     st.write(f"**Total Profit Amount:** ${total_profit:.2f}")
@@ -91,26 +90,30 @@ if selected_option == 'Purchase Window':
 # Selling Window using st.form
 if selected_option == 'Selling Window':
     st.title("Selling Window")
-    with st.form(key='selling_form'):
-        item_list = st.session_state.inventory['Item'].tolist()
-        selected_item = st.selectbox("Select Item to Sell", item_list)
-        qty = st.number_input("Quantity", min_value=1, step=1)
-        add_to_invoice_button = st.form_submit_button(label="Add to Invoice")
+    if st.session_state.inventory.empty:
+        st.warning("No items in inventory. Please add items in the Purchase Window.")
+    else:
+        with st.form(key='selling_form'):
+            item_list = st.session_state.inventory['Item'].tolist()
+            selected_item = st.selectbox("Select Item to Sell", item_list)
+            qty = st.number_input("Quantity", min_value=1, step=1)
+            add_to_invoice_button = st.form_submit_button(label="Add to Invoice")
 
-    if add_to_invoice_button and selected_item:
-        rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Selling Rate'].values[0]
-        purchase_rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Purchase Rate'].values[0]
-        amount = qty * rate
-        profit = qty * (rate - purchase_rate)
+        if add_to_invoice_button and selected_item:
+            rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Selling Rate'].values[0]
+            purchase_rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Purchase Rate'].values[0]
+            amount = qty * rate
+            profit = qty * (rate - purchase_rate)
 
-        sale_entry = {'Item': selected_item, 'Qty': qty, 'Rate': rate, 'Amount': amount, 'Profit': profit}
-        st.session_state.sales = pd.concat([st.session_state.sales, pd.DataFrame([sale_entry])], ignore_index=True)
-        st.success(f"Added {selected_item} to invoice.")
+            sale_entry = {'Item': selected_item, 'Qty': qty, 'Rate': rate, 'Amount': amount, 'Profit': profit}
+            st.session_state.sales = pd.concat([st.session_state.sales, pd.DataFrame([sale_entry])], ignore_index=True)
+            st.success(f"Added {selected_item} to invoice.")
 
-    if st.button("Generate Bill"):
-        pdf_file = generate_pdf_bill(st.session_state.sales, total_amount)
-        st.success("Bill generated successfully!")
-        st.download_button("Download Invoice", data=open(pdf_file, "rb"), file_name="invoice.pdf", mime="application/pdf")
+        if st.button("Generate Bill"):
+            total_amount = st.session_state.sales['Amount'].sum()
+            pdf_file = generate_pdf_bill(st.session_state.sales, total_amount)
+            st.success("Bill generated successfully!")
+            st.download_button("Download Invoice", data=open(pdf_file, "rb"), file_name="invoice.pdf", mime="application/pdf")
 
 # Stock Information
 if selected_option == 'Stock':
