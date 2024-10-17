@@ -84,46 +84,46 @@ menu_css = """
 # HTML structure for the menu bar
 menu_html = """
 <div class="menu-bar">
-            <div class="dropdown">
-                <a href="#">REGISTRATION</a>
-                <div class="dropdown-content">
-                    <a href="#">USER CODES</a>
-                    <a href="#">USER OPTIONS</a>
-                    <a href="#">COMPANY CODE</a>
-                    <a href="#">GODOWN CODE</a>
-                    <a href="#">ITEM CODES</a>
-                    <a href="#">SUPPLIER/DISTRIBUTORS</a>
-                    <a href="#">AREA</a>
-                    <a href="#">SALES MAN</a>
-                    <a href="#">CUSTOMER REG/LIMIT CHANGE</a>
-                    <a href="#">PARTY CODE</a>
-                </div>
-            </div>
-            <div class="dropdown">
-                <a href="#">TRANSACTION</a>
-                <div class="dropdown-content">
-                    <a href="#">EXPENSE CODES</a>
-                    <a href="#">BANK CODE</a>
-                    <a href="#">PERSONAL DRAWING CODES</a>
-                    <a href="#">LOAN ACCOUNTS CODE</a>
-                    <a href="#">ASSETS CODES</a>
-                    <a href="#">CAPITAL A/C</a>
-                </div>
-            </div>
-            <div class="dropdown">
-                <a href="#">CORRECTION</a>
-            </div>
-            <div class="dropdown">
-                <a href="#">REPORTS</a>
-            </div>
-            <div class="dropdown">
-                <a href="#">PRINTING/PDF</a>
-            </div>
-            <div class="dropdown">
-                <a href="#">OTHERS/SETTINGS</a>
-            </div>
+    <div class="dropdown">
+        <a href="#">REGISTRATION</a>
+        <div class="dropdown-content">
+            <a href="#">USER CODES</a>
+            <a href="#">USER OPTIONS</a>
+            <a href="#">COMPANY CODE</a>
+            <a href="#">GODOWN CODE</a>
+            <a href="#">ITEM CODES</a>
+            <a href="#">SUPPLIER/DISTRIBUTORS</a>
+            <a href="#">AREA</a>
+            <a href="#">SALES MAN</a>
+            <a href="#">CUSTOMER REG/LIMIT CHANGE</a>
+            <a href="#">PARTY CODE</a>
         </div>
- """  
+    </div>
+    <div class="dropdown">
+        <a href="#">TRANSACTION</a>
+        <div class="dropdown-content">
+            <a href="#">EXPENSE CODES</a>
+            <a href="#">BANK CODE</a>
+            <a href="#">PERSONAL DRAWING CODES</a>
+            <a href="#">LOAN ACCOUNTS CODE</a>
+            <a href="#">ASSETS CODES</a>
+            <a href="#">CAPITAL A/C</a>
+        </div>
+    </div>
+    <div class="dropdown">
+        <a href="#">CORRECTION</a>
+    </div>
+    <div class="dropdown">
+        <a href="#">REPORTS</a>
+    </div>
+    <div class="dropdown">
+        <a href="#">PRINTING/PDF</a>
+    </div>
+    <div class="dropdown">
+        <a href="#">OTHERS/SETTINGS</a>
+    </div>
+</div>
+"""
 
 # Function to handle user authentication
 def user_authentication(limited_access=False):
@@ -150,22 +150,22 @@ def display_dashboard(full_access):
     st.subheader("Dashboard Overview")
     # Placeholder for graph logic (could use matplotlib or Plotly)
     st.info("Graph placeholders will be here for sales, costs, and profits.")
-    
-    components.html(menu_html, height=250)
+
+    # Display the menu bar using HTML and CSS
     st.markdown(menu_css, unsafe_allow_html=True)
+    components.html(menu_html, height=250)
 
 # Main
+st.markdown(menu_css, unsafe_allow_html=True)  # Load CSS styling first
+
+# Step 1: Management Password Entry
 management_password = "admin123"
 management_password_input = st.text_input("Enter Management Password:", type="password")
 
-if st.button("Login"):
+if st.button("Submit"):
     if management_password_input == management_password:
         st.success("Management Password Verified!")
         user_authentication()
     else:
         st.error("Incorrect Management Password! Proceeding to limited access.")
         user_authentication(limited_access=True)
-
-# Display menu
-components.html(menu_html, height=250)
-st.markdown(menu_css, unsafe_allow_html=True)
