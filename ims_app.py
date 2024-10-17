@@ -1,7 +1,15 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# CSS styling for the menu bar (similar to the one you provided)
+# Initialize session state for login status
+if 'management_password_verified' not in st.session_state:
+    st.session_state.management_password_verified = False
+if 'user_logged_in' not in st.session_state:
+    st.session_state.user_logged_in = False
+if 'user_access_level' not in st.session_state:
+    st.session_state.user_access_level = None
+
+# CSS styling for the menu bar
 menu_css = """
 <style>
     body {
@@ -133,20 +141,19 @@ def user_authentication(limited_access=False):
 
     if st.button("Login"):
         if selected_user == "ADMIN" and user_password == "admin_pass":
-            if limited_access:
-                st.warning("Limited Admin Access due to incorrect management password!")
-            else:
-                st.success("Full Admin Access Granted!")
-            display_dashboard(full_access=True)
+            st.session_state.user_logged_in = True
+            st.session_state.user_access_level = 'ADMIN_FULL' if not limited_access else 'ADMIN_LIMITED'
+            st.success("Admin Access Granted!")
         elif selected_user == "USER" and user_password == "user_pass":
+            st.session_state.user_logged_in = True
+            st.session_state.user_access_level = 'USER'
             st.success("User Access Granted with Limited Rights!")
-            display_dashboard(full_access=False)
         else:
             st.error("Incorrect User ID or Password! System Closed.")
             st.stop()
 
 # Function to display the dashboard
-def display_dashboard(full_access):
+def display_dashboard():
     st.subheader("Dashboard Overview")
     # Placeholder for graph logic (could use matplotlib or Plotly)
     st.info("Graph placeholders will be here for sales, costs, and profits.")
@@ -155,17 +162,22 @@ def display_dashboard(full_access):
     st.markdown(menu_css, unsafe_allow_html=True)
     components.html(menu_html, height=250)
 
-# Main
+# Main Logic
 st.markdown(menu_css, unsafe_allow_html=True)  # Load CSS styling first
 
-# Step 1: Management Password Entry
-management_password = "admin123"
-management_password_input = st.text_input("Enter Management Password:", type="password")
-
-if st.button("Submit"):
-    if management_password_input == management_password:
-        st.success("Management Password Verified!")
+if not st.session_state.management_password_verified:
+    # Step 1: Management Password Entry
+    management_password_input = st.text_input("Enter Management Password:", type="password")
+    if st.button("Submit Management Password"):
+        if management_password_input == "admin123":
+            st.session_state.management_password_verified = True
+            st.success("Management Password Verified!")
+        else:
+            st.error("Incorrect Management Password! Proceeding to limited access.")
+            user_authentication(limited_access=True)
+else:
+    # Step 2: User Authentication
+    if not st.session_state.user_logged_in:
         user_authentication()
     else:
-        st.error("Incorrect Management Password! Proceeding to limited access.")
-        user_authentication(limited_access=True)
+        display_dashboard()
