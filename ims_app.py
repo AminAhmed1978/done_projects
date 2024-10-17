@@ -84,52 +84,46 @@ menu_css = """
 # HTML structure for the menu bar
 menu_html = """
 <div class="menu-bar">
-    <div class="dropdown">
-        <button class="dropbtn">REGISTRATION</button>
-        <div class="dropdown-content">
-            <a href="#">USER CODES</a>
-            <a href="#">USER OPTIONS</a>
-            <a href="#">COMPANY CODE</a>
-            <a href="#">ITEM CODES</a>
+            <div class="dropdown">
+                <a href="#">REGISTRATION</a>
+                <div class="dropdown-content">
+                    <a href="#">USER CODES</a>
+                    <a href="#">USER OPTIONS</a>
+                    <a href="#">COMPANY CODE</a>
+                    <a href="#">GODOWN CODE</a>
+                    <a href="#">ITEM CODES</a>
+                    <a href="#">SUPPLIER/DISTRIBUTORS</a>
+                    <a href="#">AREA</a>
+                    <a href="#">SALES MAN</a>
+                    <a href="#">CUSTOMER REG/LIMIT CHANGE</a>
+                    <a href="#">PARTY CODE</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">TRANSACTION</a>
+                <div class="dropdown-content">
+                    <a href="#">EXPENSE CODES</a>
+                    <a href="#">BANK CODE</a>
+                    <a href="#">PERSONAL DRAWING CODES</a>
+                    <a href="#">LOAN ACCOUNTS CODE</a>
+                    <a href="#">ASSETS CODES</a>
+                    <a href="#">CAPITAL A/C</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#">CORRECTION</a>
+            </div>
+            <div class="dropdown">
+                <a href="#">REPORTS</a>
+            </div>
+            <div class="dropdown">
+                <a href="#">PRINTING/PDF</a>
+            </div>
+            <div class="dropdown">
+                <a href="#">OTHERS/SETTINGS</a>
+            </div>
         </div>
-    </div> 
-    <div class="dropdown">
-        <button class="dropbtn">TRANSACTION</button>
-        <div class="dropdown-content">
-            <a href="#">SALES ENTRY</a>
-            <a href="#">PURCHASE ENTRY</a>
-        </div>
-    </div> 
-    <div class="dropdown">
-        <button class="dropbtn">CORRECTION</button>
-        <div class="dropdown-content">
-            <a href="#">CORRECT SALES</a>
-            <a href="#">CORRECT PURCHASE</a>
-        </div>
-    </div> 
-    <div class="dropdown">
-        <button class="dropbtn">REPORTS</button>
-        <div class="dropdown-content">
-            <a href="#">SALES REPORT</a>
-            <a href="#">PURCHASE REPORT</a>
-        </div>
-    </div> 
-    <div class="dropdown">
-        <button class="dropbtn">PRINTING/PDF</button>
-        <div class="dropdown-content">
-            <a href="#">PRINT INVOICE</a>
-            <a href="#">EXPORT TO PDF</a>
-        </div>
-    </div> 
-    <div class="dropdown">
-        <button class="dropbtn">OTHERS/SETTINGS</button>
-        <div class="dropdown-content">
-            <a href="#">SET PASSWORD</a>
-            <a href="#">SYSTEM SETTINGS</a>
-        </div>
-    </div> 
-</div>
-"""
+   
 
 # Function to handle user authentication
 def user_authentication(limited_access=False):
@@ -164,7 +158,7 @@ def display_dashboard(full_access):
 management_password = "admin123"
 management_password_input = st.text_input("Enter Management Password:", type="password")
 
-if st.button("Submit"):
+if st.button("Login"):
     if management_password_input == management_password:
         st.success("Management Password Verified!")
         user_authentication()
