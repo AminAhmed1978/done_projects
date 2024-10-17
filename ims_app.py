@@ -14,7 +14,7 @@ def user_authentication(limited_access=False):
     selected_user = st.selectbox("Select User ID", user_ids)
     user_password = st.text_input("Enter User Password:", type="password")
 
-    if st.button("Login"):
+    if st.button("Login", key="user_login_button"):
         if selected_user == "ADMIN" and user_password == "admin_pass":
             st.session_state.user_logged_in = True
             st.session_state.user_access_level = "ADMIN" if not limited_access else "LIMITED_ADMIN"
@@ -72,7 +72,7 @@ def display_dashboard():
 if not st.session_state.management_password_verified:
     # Step 1: Management Password Entry
     management_password_input = st.text_input("Enter Management Password:", type="password")
-    if st.button("Submit Management Password"):
+    if st.button("Submit Management Password", key="management_login_button"):
         if management_password_input == "admin123":
             st.session_state.management_password_verified = True
             st.success("Management Password Verified!")
