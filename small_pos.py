@@ -1,77 +1,94 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-from fpdf import FPDF
 
-# Initialize session state for inventory and sales if not already initialized
+# CSS styles for a more professional look
+st.markdown("""
+    <style>
+        .main-title {
+            text-align: center;
+            font-size: 36px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .sub-title {
+            text-align: center;
+            font-size: 24px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .info-text {
+            color: #333;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .dashboard-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .dashboard-card {
+            background-color: #f1f1f1;
+            padding: 20px;
+            border-radius: 10px;
+            width: 45%;
+            text-align: center;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-card h3 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Initialize session state for inventory, sales, and admin authentication
 if 'inventory' not in st.session_state:
-    st.session_state.inventory = pd.DataFrame(columns=['Item', 'Stock Qty', 'Purchase Rate', 'Selling Rate'])
+    st.session_state.inventory = pd.DataFrame(columns=['Item', 'Unit', 'Stock Qty', 'Purchase Rate', 'Selling Rate'])
 if 'sales' not in st.session_state:
-    st.session_state.sales = pd.DataFrame(columns=['Item', 'Qty', 'Rate', 'Amount', 'Profit'])
+    st.session_state.sales = pd.DataFrame(columns=['Item', 'Unit', 'Qty', 'Rate', 'Amount'])
+if 'is_admin' not in st.session_state:
+    st.session_state.is_admin = False
 
-# Function to generate PDF bill with improved formatting
-def generate_pdf_bill(sales_df, total_amount):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", 'B', size=14)
-    pdf.cell(200, 10, txt="Invoice", ln=True, align="C")
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Item List", ln=True, align="L")
+# Admin authentication area
+def admin_login():
+    st.markdown("<h1 class='main-title'>Admin Login</h1>", unsafe_allow_html=True)
+    username = st.text_input("Username", type="text")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if username == "admin" and password == "admin123":
+            st.session_state.is_admin = True
+            st.success("Admin login successful!")
+        else:
+            st.error("Incorrect username or password")
 
-    pdf.set_font("Arial", size=10)
-    pdf.cell(200, 10, txt="Item | Qty | Rate | Amount", ln=True)
-    pdf.cell(200, 5, txt="------------------------------------------", ln=True)
+# Admin area with inventory management and dashboard
+def admin_area():
+    st.markdown("<h1 class='main-title'>Admin Area</h1>", unsafe_allow_html=True)
 
-    for index, row in sales_df.iterrows():
-        pdf.cell(200, 10, txt=f"{row['Item']} | {row['Qty']} | {row['Rate']} | {row['Amount']}", ln=True)
-
-    pdf.cell(200, 10, txt="------------------------------------------", ln=True)
-    pdf.set_font("Arial", 'B', size=12)
-    pdf.cell(200, 10, txt=f"Total Amount: {total_amount}", ln=True)
-    pdf.cell(200, 10, txt="------------------------------------------", ln=True)
-
-    # Add footer text with developer information
-    pdf.set_font("Arial", size=10)
-    pdf.cell(200, 10, txt="Developed by: AMIN AHMED", ln=True, align="C")
-
-    pdf_file = "invoice.pdf"
-    pdf.output(pdf_file)
-    return pdf_file
-
-# Sidebar for navigation
-st.sidebar.title("POS System")
-st.sidebar.markdown("<h1 style='text-align: center; font-size: 24px;'>POS System</h1>", unsafe_allow_html=True)
-st.sidebar.markdown("<h2 style='text-align: center; font-size: 15px;'>Developed by: AMIN AHMED</h2>", unsafe_allow_html=True)
-
-selected_option = st.sidebar.radio("Choose an option:", ['Dashboard', 'Purchase Window', 'Selling Window', 'Stock'])
-
-# Dashboard
-if selected_option == 'Dashboard':
-    st.markdown("<h1 style='text-align: center; font-size: 32px;'>POS System</h1>", unsafe_allow_html=True)
-    st.markdown("<h2 style='text-align: center; font-size: 15px;'>Developed by: AMIN AHMED</h2>", unsafe_allow_html=True)
-
-    # Summarize and display total sales and profit
+    # Dashboard for total sales and profit
+    st.markdown("<h2 class='sub-title'>Dashboard</h2>", unsafe_allow_html=True)
     total_sales = st.session_state.sales['Amount'].sum()
-    total_profit = st.session_state.sales['Profit'].sum()
+    total_profit = (st.session_state.sales['Amount'] - (st.session_state.sales['Qty'] * st.session_state.sales['Rate'])).sum()
 
-    st.write(f"**Total Sales Amount:** ${total_sales:.2f}")
-    st.write(f"**Total Profit Amount:** ${total_profit:.2f}")
+    st.markdown(f"""
+        <div class='dashboard-container'>
+            <div class='dashboard-card'>
+                <h3>Total Sales Amount</h3>
+                <p>${total_sales:,.2f}</p>
+            </div>
+            <div class='dashboard-card'>
+                <h3>Total Profit Amount</h3>
+                <p>${total_profit:,.2f}</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    # Display a resized sales and profit bar chart
-    if not st.session_state.sales.empty:
-        fig, ax = plt.subplots(figsize=(6, 4))  # Reduced the chart size
-        ax.bar(['Total Sales', 'Total Profit'], [total_sales, total_profit], color=['blue', 'green'])
-        ax.set_title('Sales and Profit Summary')
-        ax.set_ylabel('Amount ($)')
-        st.pyplot(fig)
-    else:
-        st.write("No sales data available to display the graph.")
-
-# Purchase Window using st.form
-if selected_option == 'Purchase Window':
-    st.title("Purchase Window")
-    with st.form(key='purchase_form'):
+    # Inventory management form
+    st.markdown("<h2 class='sub-title'>Manage Inventory</h2>", unsafe_allow_html=True)
+    with st.form(key='inventory_form'):
         item = st.text_input("Item Name")
+        unit = st.selectbox("Unit", ["Unit", "Kgs", "Dozen"])
         stock_qty = st.number_input("Stock Quantity", min_value=0, step=1)
         purchase_rate = st.number_input("Purchase Rate", min_value=0.0, format="%.2f")
         selling_rate = st.number_input("Selling Rate", min_value=0.0, format="%.2f")
@@ -80,43 +97,54 @@ if selected_option == 'Purchase Window':
     if submit_button:
         new_item = {
             'Item': item,
+            'Unit': unit,
             'Stock Qty': stock_qty,
             'Purchase Rate': purchase_rate,
             'Selling Rate': selling_rate
         }
         st.session_state.inventory = pd.concat([st.session_state.inventory, pd.DataFrame([new_item])], ignore_index=True)
-        st.success(f"Added {item} to inventory.")
+        st.success(f"Item '{item}' added to inventory.")
 
-# Selling Window using st.form
-if selected_option == 'Selling Window':
-    st.title("Selling Window")
-    if st.session_state.inventory.empty:
-        st.warning("No items in inventory. Please add items in the Purchase Window.")
-    else:
-        with st.form(key='selling_form'):
+    # Display current inventory
+    st.write("**Current Inventory**")
+    st.dataframe(st.session_state.inventory)
+
+# Customer area for making purchases
+def customer_area():
+    st.markdown("<h1 class='main-title'>Customer Area</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 class='sub-title'>Make a Purchase</h2>", unsafe_allow_html=True)
+
+    if not st.session_state.inventory.empty:
+        with st.form(key='sales_form'):
             item_list = st.session_state.inventory['Item'].tolist()
-            selected_item = st.selectbox("Select Item to Sell", item_list)
+            selected_item = st.selectbox("Select Item", item_list)
+            unit = st.selectbox("Unit", ["Unit", "Kgs", "Dozen"])
             qty = st.number_input("Quantity", min_value=1, step=1)
             add_to_invoice_button = st.form_submit_button(label="Add to Invoice")
 
-        if add_to_invoice_button and selected_item:
+        if add_to_invoice_button:
             rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Selling Rate'].values[0]
-            purchase_rate = st.session_state.inventory[st.session_state.inventory['Item'] == selected_item]['Purchase Rate'].values[0]
             amount = qty * rate
-            profit = qty * (rate - purchase_rate)
-
-            sale_entry = {'Item': selected_item, 'Qty': qty, 'Rate': rate, 'Amount': amount, 'Profit': profit}
+            sale_entry = {'Item': selected_item, 'Unit': unit, 'Qty': qty, 'Rate': rate, 'Amount': amount}
             st.session_state.sales = pd.concat([st.session_state.sales, pd.DataFrame([sale_entry])], ignore_index=True)
-            st.success(f"Added {selected_item} to invoice.")
+            st.success(f"Item '{selected_item}' added to the invoice.")
 
-        if st.button("Generate Bill"):
-            total_amount = st.session_state.sales['Amount'].sum()
-            pdf_file = generate_pdf_bill(st.session_state.sales, total_amount)
-            st.success("Bill generated successfully!")
-            st.download_button("Download Invoice", data=open(pdf_file, "rb"), file_name="invoice.pdf", mime="application/pdf")
+        # Display sales invoice
+        st.markdown("<h3 class='sub-title'>Sales Invoice</h3>", unsafe_allow_html=True)
+        if not st.session_state.sales.empty:
+            st.dataframe(st.session_state.sales)
+            st.write(f"**Total Amount Due:** ${st.session_state.sales['Amount'].sum():,.2f}")
+    else:
+        st.warning("No items available for sale. Please check back later.")
 
-# Stock Information
-if selected_option == 'Stock':
-    st.title("Current Stock")
-    st.write("Check remaining stock of items.")
-    st.dataframe(st.session_state.inventory[['Item', 'Stock Qty']])
+# Main app logic to switch between admin and customer areas
+st.sidebar.title("POS System Navigation")
+user_type = st.sidebar.radio("Choose your role:", ["Admin", "Customer"])
+
+if user_type == "Admin":
+    if st.session_state.is_admin:
+        admin_area()
+    else:
+        admin_login()
+else:
+    customer_area()
