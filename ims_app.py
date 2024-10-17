@@ -123,7 +123,7 @@ menu_html = """
                 <a href="#">OTHERS/SETTINGS</a>
             </div>
         </div>
-   
+ """  
 
 # Function to handle user authentication
 def user_authentication(limited_access=False):
