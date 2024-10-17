@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
 # Initialize session state for login status
 if 'management_password_verified' not in st.session_state:
@@ -8,130 +7,6 @@ if 'user_logged_in' not in st.session_state:
     st.session_state.user_logged_in = False
 if 'user_access_level' not in st.session_state:
     st.session_state.user_access_level = None
-
-# CSS styling for the menu bar
-menu_css = """
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #111111;
-        color: white;
-    }
-
-    .menu-bar {
-        background-color: #333;
-        overflow: hidden;
-        padding: 10px;
-    }
-
-    .menu-bar a {
-        float: left;
-        color: #f2f2f2;
-        text-align: center;
-        padding: 14px 16px;
-        text-decoration: none;
-        font-size: 17px;
-    }
-
-    .menu-bar a:hover {
-        background-color: #ddd;
-        color: black;
-    }
-
-    .dropdown {
-        float: left;
-        overflow: hidden;
-    }
-
-    .dropdown .dropbtn {
-        font-size: 17px;
-        border: none;
-        outline: none;
-        color: white;
-        padding: 14px 16px;
-        background-color: inherit;
-        font-family: inherit;
-        margin: 0;
-    }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f9f9f9;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-    }
-
-    .dropdown-content a {
-        float: none;
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-        text-align: left;
-    }
-
-    .dropdown-content a:hover {
-        background-color: #ddd;
-    }
-
-    .dropdown:hover .dropdown-content {
-        display: block;
-    }
-
-    .dashboard {
-        padding: 20px;
-        text-align: center;
-        background-color: #444;
-        margin-top: 20px;
-    }
-</style>
-"""
-
-# HTML structure for the menu bar
-menu_html = """
-<div class="menu-bar">
-    <div class="dropdown">
-        <a href="#">REGISTRATION</a>
-        <div class="dropdown-content">
-            <a href="#">USER CODES</a>
-            <a href="#">USER OPTIONS</a>
-            <a href="#">COMPANY CODE</a>
-            <a href="#">GODOWN CODE</a>
-            <a href="#">ITEM CODES</a>
-            <a href="#">SUPPLIER/DISTRIBUTORS</a>
-            <a href="#">AREA</a>
-            <a href="#">SALES MAN</a>
-            <a href="#">CUSTOMER REG/LIMIT CHANGE</a>
-            <a href="#">PARTY CODE</a>
-        </div>
-    </div>
-    <div class="dropdown">
-        <a href="#">TRANSACTION</a>
-        <div class="dropdown-content">
-            <a href="#">EXPENSE CODES</a>
-            <a href="#">BANK CODE</a>
-            <a href="#">PERSONAL DRAWING CODES</a>
-            <a href="#">LOAN ACCOUNTS CODE</a>
-            <a href="#">ASSETS CODES</a>
-            <a href="#">CAPITAL A/C</a>
-        </div>
-    </div>
-    <div class="dropdown">
-        <a href="#">CORRECTION</a>
-    </div>
-    <div class="dropdown">
-        <a href="#">REPORTS</a>
-    </div>
-    <div class="dropdown">
-        <a href="#">PRINTING/PDF</a>
-    </div>
-    <div class="dropdown">
-        <a href="#">OTHERS/SETTINGS</a>
-    </div>
-</div>
-"""
 
 # Function to handle user authentication
 def user_authentication(limited_access=False):
@@ -142,29 +17,58 @@ def user_authentication(limited_access=False):
     if st.button("Login"):
         if selected_user == "ADMIN" and user_password == "admin_pass":
             st.session_state.user_logged_in = True
-            st.session_state.user_access_level = 'ADMIN_FULL' if not limited_access else 'ADMIN_LIMITED'
+            st.session_state.user_access_level = "ADMIN" if not limited_access else "LIMITED_ADMIN"
             st.success("Admin Access Granted!")
         elif selected_user == "USER" and user_password == "user_pass":
             st.session_state.user_logged_in = True
-            st.session_state.user_access_level = 'USER'
-            st.success("User Access Granted with Limited Rights!")
+            st.session_state.user_access_level = "USER"
+            st.success("User Access Granted!")
         else:
             st.error("Incorrect User ID or Password! System Closed.")
             st.stop()
 
+# Function to display the Windows-like menu using Streamlit's expanders
+def display_menu():
+    st.sidebar.title("Menu")
+
+    with st.sidebar.expander("REGISTRATION"):
+        st.write("- USER CODES")
+        st.write("- USER OPTIONS")
+        st.write("- COMPANY CODE")
+        st.write("- GODOWN CODE")
+        st.write("- ITEM CODES")
+        st.write("- SUPPLIER/DISTRIBUTORS")
+        st.write("- AREA")
+        st.write("- SALES MAN")
+        st.write("- CUSTOMER REG/LIMIT CHANGE")
+        st.write("- PARTY CODE")
+
+    with st.sidebar.expander("TRANSACTION"):
+        st.write("- EXPENSE CODES")
+        st.write("- BANK CODE")
+        st.write("- PERSONAL DRAWING CODES")
+        st.write("- LOAN ACCOUNTS CODE")
+        st.write("- ASSETS CODES")
+        st.write("- CAPITAL A/C")
+
+    with st.sidebar.expander("CORRECTION"):
+        st.write("- Correction Options")
+
+    with st.sidebar.expander("REPORTS"):
+        st.write("- Reports Options")
+
+    with st.sidebar.expander("PRINTING/PDF"):
+        st.write("- Printing Options")
+
+    with st.sidebar.expander("OTHERS/SETTINGS"):
+        st.write("- Other Settings")
+
 # Function to display the dashboard
 def display_dashboard():
     st.subheader("Dashboard Overview")
-    # Placeholder for graph logic (could use matplotlib or Plotly)
     st.info("Graph placeholders will be here for sales, costs, and profits.")
 
-    # Display the menu bar using HTML and CSS
-    st.markdown(menu_css, unsafe_allow_html=True)
-    components.html(menu_html, height=250)
-
 # Main Logic
-st.markdown(menu_css, unsafe_allow_html=True)  # Load CSS styling first
-
 if not st.session_state.management_password_verified:
     # Step 1: Management Password Entry
     management_password_input = st.text_input("Enter Management Password:", type="password")
@@ -180,4 +84,6 @@ else:
     if not st.session_state.user_logged_in:
         user_authentication()
     else:
+        # Step 3: Display dashboard and menu after successful login
         display_dashboard()
+        display_menu()
