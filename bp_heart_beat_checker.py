@@ -14,7 +14,7 @@ def resize_image(image, max_size=512):
     width, height = image.size
     scaling_factor = min(max_size / width, max_size / height)
     new_size = (int(width * scaling_factor), int(height * scaling_factor))
-    return image.resize(new_size, Image.ANTIALIAS)
+    return image.resize(new_size, Image.LANCZOS)  # Updated to Image.LANCZOS
 
 def async_depth_estimation(image):
     with concurrent.futures.ThreadPoolExecutor() as executor:
