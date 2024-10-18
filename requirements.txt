@@ -6,6 +6,5 @@ transformers
 torch
 opencv-python
 Pillow
-opencv-python-headless
 numpy
-opencv-python-headless
+
