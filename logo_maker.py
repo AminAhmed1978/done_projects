@@ -24,7 +24,9 @@ def create_graphical_logo(text, bg_color, text_color, font_style):
         shape_type = random.choice(['circle', 'rectangle', 'line'])
 
         if shape_type == 'circle':
-            draw.ellipse([(x1, y1), (x2, y2)], outline=text_color, width=2)
+            # Workaround for the width issue with ellipse
+            for i in range(2):  # Adjust the range for the desired thickness
+                draw.ellipse([(x1 - i, y1 - i), (x2 + i, y2 + i)], outline=text_color)
         elif shape_type == 'rectangle':
             draw.rectangle([(x1, y1), (x2, y2)], outline=text_color, width=2)
         elif shape_type == 'line':
