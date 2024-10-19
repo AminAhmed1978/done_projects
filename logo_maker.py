@@ -1,6 +1,5 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
-import random
 import os
 
 def create_logo(text, bg_color, text_color, font_style):
@@ -15,10 +14,12 @@ def create_logo(text, bg_color, text_color, font_style):
     except IOError:
         font = ImageFont.load_default()
 
-    # Calculate text size and position
-    text_size = draw.textsize(text, font=font)
-    text_x = (image.width - text_size[0]) / 2
-    text_y = (image.height - text_size[1]) / 2
+    # Calculate text size and position using textbbox()
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = (image.width - text_width) / 2
+    text_y = (image.height - text_height) / 2
 
     # Draw the text on the image
     draw.text((text_x, text_y), text, font=font, fill=text_color)
