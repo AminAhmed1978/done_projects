@@ -21,14 +21,19 @@ def create_graphical_logo(text, bg_color, text_color, font_style):
     for _ in range(10):
         x1, y1 = random.randint(0, width), random.randint(0, height)
         x2, y2 = random.randint(0, width), random.randint(0, height)
+
+        # Ensure that x1, y1 are the top-left corner and x2, y2 are the bottom-right corner
+        left, top = min(x1, x2), min(y1, y2)
+        right, bottom = max(x1, x2), max(y1, y2)
+
         shape_type = random.choice(['circle', 'rectangle', 'line'])
 
         if shape_type == 'circle':
             # Workaround for the width issue with ellipse
             for i in range(2):  # Adjust the range for the desired thickness
-                draw.ellipse([(x1 - i, y1 - i), (x2 + i, y2 + i)], outline=text_color)
+                draw.ellipse([(left - i, top - i), (right + i, bottom + i)], outline=text_color)
         elif shape_type == 'rectangle':
-            draw.rectangle([(x1, y1), (x2, y2)], outline=text_color, width=2)
+            draw.rectangle([(left, top), (right, bottom)], outline=text_color, width=2)
         elif shape_type == 'line':
             draw.line([(x1, y1), (x2, y2)], fill=text_color, width=2)
 
