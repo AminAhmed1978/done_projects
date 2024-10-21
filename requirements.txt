@@ -13,3 +13,4 @@ soundfile
 gtts
 groq
 librosa
+playsound
