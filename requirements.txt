@@ -9,7 +9,6 @@ Pillow
 numpy
 gradio
 openai-whisper
-torch
 soundfile
 gtts
 groq
