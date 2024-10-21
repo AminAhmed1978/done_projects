@@ -1,5 +1,5 @@
 import os
-from openai import whisper
+import whisper
 from groq import Groq
 from gtts import gTTS
 import gradio as gr
