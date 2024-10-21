@@ -7,5 +7,10 @@ torch
 opencv-python-headless
 Pillow
 numpy
-whisper
+gradio
+openai-whisper
+torch
+soundfile
+gtts
 groq
+librosa
