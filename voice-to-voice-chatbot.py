@@ -8,7 +8,7 @@ import tempfile
 
 # Set up the Groq client
 client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),
+    api_key=os.environ.get("gsk_3U90LE9QszpPzMGIeDUYWGdyb3FYVTj75zH6gcWo7I4Ym28FU8gmY"),
 )
 
 # Load the Whisper model for speech-to-text
