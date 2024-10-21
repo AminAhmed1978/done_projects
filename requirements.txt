@@ -8,9 +8,10 @@ opencv-python-headless
 Pillow
 numpy
 gradio
-openai-whisper
 soundfile
-gtts
 groq
-librosa
-playsound
+openai-whisper
+ffmpeg-python
+gtts
+pygame
+requests
