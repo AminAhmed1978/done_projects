@@ -15,5 +15,3 @@ gtts
 groq
 librosa
 import os
-playsound
-tempfile
